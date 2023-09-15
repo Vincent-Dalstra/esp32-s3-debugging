@@ -56,15 +56,27 @@ void loop()
     //digitalWrite(LED_BUILTIN, LOW);
     //delay(500);
     digitalWrite(15, HIGH);
-    delay(500);             // Uses vTaskDelay()
+    delay(5000);              // Uses vTaskDelay()
     digitalWrite(15, LOW);
-    vTaskDelay(500);
+    vTaskDelay(5000);         // Uses vTaskDelay()
     digitalWrite(16, HIGH);
-    trueDelay(5000);
+    trueDelay(5000);          // Uses vTaskDelayUntil()
     digitalWrite(16, LOW);
-    trueDelay(5000);
+    delayMicroseconds(5000 * 1000);   // This works properly, becaue it uses busy-waiting instead of yielding (and involving the task scheduler)
   }
 }
+
+/*  So to just get across how weird this problem is...
+ *  - Time spent in the debugger counts against any calls to vTaskDelay() thereafter...
+ *  - It is cumulative in both directions! If the time exceeds the next delay(), the remainder
+ *    will carry over to the delay() after that, and so on.
+ *
+ *  - Applies to vTaskDelayUntil() as well.
+ *    - EVEN WHEN YOU EXPLICITLY PASS IT THE TIME
+ *      - (You're supposed to pass it a pointer and let it increment on its own)
+ *      - See code below.
+ */
+
 
 
 bool trueDelay(int millis)
